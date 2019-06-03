@@ -5,15 +5,19 @@ const defaults =
 {
 	gstPath: '/usr/bin/gst-launch-1.0',
 	verbose: false,
-	width: 1920,
-	height: 1080,
-	fps: 30,
-	mbps: 4,
 	preset: 'superfast',
 	format: 'matroska',
 	output: 'stdout',
 	pipewire: {
 		path: null // = default
+	},
+	video: {
+		width: 1920,
+		height: 1080,
+		fps: 30,
+		mbps: 4,
+		scaling: false,
+		borders: true
 	},
 	audio: {
 		device: null, // = no sound
@@ -48,20 +52,24 @@ class recorder
 			var videoOpts = [
 			'!', 'queue', 'leaky=2', 'max-size-buffers=0', 'max-size-time=0', 'max-size-bytes=0',
 			'!', 'videorate',
-			'!', `video/x-raw,width=${opts.width},height=${opts.height},framerate=${opts.fps}/1`,
+			'!', `video/x-raw,framerate=${opts.video.fps}/1`,
 			'!', 'videoconvert',
 			'!', 'queue',
 			'!', 'x264enc', 'sliced-threads=true', 'tune=zerolatency',
-				`speed-preset=${opts.preset}`, `bitrate=${opts.mbps * 1024}`,
-				`key-int-max=${opts.fps * 2}`,
+				`speed-preset=${opts.preset}`, `bitrate=${opts.video.mbps * 1024}`,
+				`key-int-max=${opts.video.fps * 2}`,
 			'!', 'h264parse',
 			'!', 'video/x-h264,profile=main'
 			];
 
 			if(displayServer == 'x11')
-				videoOpts.unshift('ximagesrc', 'use-damage=0', 'do-timestamp=true');
+				videoOpts.unshift('ximagesrc', 'use-damage=false', 'do-timestamp=true');
 			else
-				videoOpts.unshift('pipewiresrc', `path=${opts.pipewire.path}`, 'do-timestamp=true', '!');
+				videoOpts.unshift('pipewiresrc', `path=${opts.pipewire.path}`, 'do-timestamp=true');
+
+			if(opts.video.scaling)
+				videoOpts.splice(videoOpts.indexOf('videoconvert') - 1, 0, '!', 'videoscale', `add-borders=${opts.video.borders}`,
+					'!', `video/x-raw,width=${opts.video.width},height=${opts.video.height},pixel-aspect-ratio=1/1`);
 
 			var extension;
 			switch(opts.format)
