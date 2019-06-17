@@ -39,7 +39,10 @@ class recorder
 	constructor(options)
 	{
 		this.process = null;
-		this.opts = options;
+
+		if(!(options instanceof Object)) options = {};
+		this.opts = deepMerge(defaults, options);
+
 		const displayServer = process.env.XDG_SESSION_TYPE.toLowerCase();
 
 		var generateConfig = () =>
@@ -47,7 +50,7 @@ class recorder
 			var opts = this.getOptions();
 
 			if(!fs.existsSync(opts.gstPath))
-				throw new Error(`File does not exists: ${opts.gstPath}`);
+				throw new Error(`File does not exists: "${opts.gstPath}"`);
 
 			var videoOpts = [
 			'!', 'queue', 'leaky=2', 'max-size-buffers=0', 'max-size-time=0', 'max-size-bytes=0',
@@ -122,6 +125,8 @@ class recorder
 						`host=${opts.server.host}`, `port=${opts.server.port}`, 'sync=false'];
 					break;
 				case('file'):
+					if(!fs.existsSync(opts.file.dir))
+						throw new Error(`Directory does not exists: "${opts.file.dir}"`);
 					outOpts = ['!', 'filesink',
 						`location=${opts.file.dir}/${opts.file.name}${extension}`, 'sync=false'];
 					break;
@@ -185,9 +190,12 @@ class recorder
 			catch(err) { console.log(err.message); }
 		}
 
-		this.getOptions = () =>
+		this.getOptions = (target, source) =>
 		{
-			return deepMerge(defaults, this.opts);
+			var mgrTarget = (target instanceof Object) ? target : defaults;
+			var mgrSource = (source instanceof Object) ? source : this.opts;
+
+			return deepMerge(mgrTarget, mgrSource);
 		}
 
 		this.getAudioDevices = (asArray) =>
@@ -230,13 +238,20 @@ function createFilename()
 
 function deepMerge(target, source)
 {
+	var parsedSource = {};
+
 	for(var key in source)
 	{
-		if(source[key] instanceof Object)
-			source[key] = { ...target[key], ...source[key] };
+		if(target.hasOwnProperty(key))
+		{
+			if(source[key] instanceof Object)
+				parsedSource[key] = deepMerge(target[key], source[key]);
+			else
+				parsedSource[key] = source[key];
+		}
 	}
 
-	return target = { ...target, ...source };
+	return target = { ...target, ...parsedSource };
 }
 
 module.exports = recorder;
