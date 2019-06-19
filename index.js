@@ -4,7 +4,6 @@ const { spawn, execSync } = require('child_process');
 const defaults =
 {
 	gstPath: '/usr/bin/gst-launch-1.0',
-	verbose: false,
 	output: 'stdout',
 	preset: 'superfast',
 	format: 'matroska',
@@ -65,7 +64,7 @@ class recorder
 			'!', 'video/x-h264,profile=main'
 			];
 
-			if(displayServer == 'x11')
+			if(displayServer === 'x11')
 				videoOpts.unshift('ximagesrc', 'use-damage=false', 'do-timestamp=true');
 			else
 				videoOpts.unshift('pipewiresrc', `path=${opts.pipewire.path}`, 'do-timestamp=true');
@@ -142,32 +141,12 @@ class recorder
 				encodeOpts = [...videoOpts, ...outOpts];
 
 			var stdio;
-			if(opts.verbose)
-			{
-				if(opts.output == 'stdout')
-				{
-					stdio = ['inherit', 'pipe', 'inherit'];
-					encodeOpts.unshift('-qe');
-				}
-				else
-				{
-					stdio = 'inherit';
-					encodeOpts.unshift('-e');
-				}
-			}
+			if(opts.output === 'stdout')
+				stdio = ['ignore', 'pipe', 'ignore'];
 			else
-			{
-				if(opts.output == 'stdout')
-				{
-					stdio = ['ignore', 'pipe', 'ignore'];
-					encodeOpts.unshift('-qe');
-				}
-				else
-				{
-					stdio = 'ignore';
-					encodeOpts.unshift('-qe');
-				}
-			}
+				stdio = 'ignore';
+
+			encodeOpts.unshift('-qe');
 
 			return { opts: opts, encodeOpts: encodeOpts, stdio: stdio };
 		}
@@ -181,7 +160,7 @@ class recorder
 			this.process.once('close', () => this.process = null);
 			this.process.once('error', (err) => console.error(err.message));
 
-			if(config.opts.output == 'stdout')
+			if(config.opts.output === 'stdout')
 				return this.process.stdout;
 		}
 
