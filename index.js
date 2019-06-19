@@ -111,7 +111,7 @@ class recorder
 				audioOpts = [...audioOpts, ...audioEncOpts];
 			}
 
-			if(!opts.file.name)
+			if(opts.file.name === null)
 				opts.file.name = createFilename();
 
 			var outOpts;
