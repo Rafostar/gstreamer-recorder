@@ -178,7 +178,7 @@ class recorder
 
 			this.process = spawn(config.opts.gstPath, config.encodeOpts, { stdio: config.stdio });
 			this.process.once('close', () => this.process = null);
-			this.process.once('error', (err) => console.log(err.message));
+			this.process.once('error', (err) => console.error(err.message));
 
 			if(config.opts.output == 'stdout')
 				return this.process.stdout;
@@ -187,7 +187,7 @@ class recorder
 		this.stop = () =>
 		{
 			try { process.kill(this.process.pid, 'SIGHUP'); }
-			catch(err) { console.log(err.message); }
+			catch(err) { console.error(err.message); }
 		}
 
 		this.getOptions = (target, source) =>
