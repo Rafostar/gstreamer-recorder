@@ -1,6 +1,8 @@
 # gstreamer-recorder
 GStreamer wrapper for recording desktop.
 
+Requires [GStreamer-1.0](https://gstreamer.freedesktop.org) with `gst-launch-1.0` binary and following GStreamer1 plugins: base, good, bad, ugly.
+
 Used by [GNOME Shell Extension Cast to TV](https://github.com/Rafostar/gnome-shell-extension-cast-to-tv) and [gst-rec](https://github.com/Rafostar/gst-rec) terminal app.
 
 ## Examples
