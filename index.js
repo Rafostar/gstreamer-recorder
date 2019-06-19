@@ -5,9 +5,9 @@ const defaults =
 {
 	gstPath: '/usr/bin/gst-launch-1.0',
 	verbose: false,
+	output: 'stdout',
 	preset: 'superfast',
 	format: 'matroska',
-	output: 'stdout',
 	pipewire: {
 		path: null // = default
 	},
@@ -74,15 +74,16 @@ class recorder
 				videoOpts.splice(videoOpts.indexOf('videoconvert') - 1, 0, '!', 'videoscale', `add-borders=${opts.video.borders}`,
 					'!', `video/x-raw,width=${opts.video.width},height=${opts.video.height},pixel-aspect-ratio=1/1`);
 
+			var isStreamable = (opts.output === 'file') ? false : true;
 			var extension;
 			switch(opts.format)
 			{
 				case('matroska'):
-					videoOpts.push('!', 'matroskamux', 'name=mux', 'streamable=true');
+					videoOpts.push('!', 'matroskamux', 'name=mux', `streamable=${isStreamable}`);
 					extension = '.mkv';
 					break;
 				case('mp4'):
-					videoOpts.push('!', 'mp4mux', 'name=mux', 'streamable=true', 'fragment-duration=1000');
+					videoOpts.push('!', 'mp4mux', 'name=mux', `streamable=${isStreamable}`, 'fragment-duration=1');
 					extension = '.mp4';
 					break;
 				default:
@@ -176,7 +177,7 @@ class recorder
 			if(this.process) this.stop();
 			var config = generateConfig();
 
-			this.process = spawn(config.opts.gstPath, config.encodeOpts, { stdio: config.stdio });
+			this.process = spawn(config.opts.gstPath, config.encodeOpts, { stdio: config.stdio, detached: true });
 			this.process.once('close', () => this.process = null);
 			this.process.once('error', (err) => console.error(err.message));
 
@@ -186,7 +187,7 @@ class recorder
 
 		this.stop = () =>
 		{
-			try { process.kill(this.process.pid, 'SIGHUP'); }
+			try { this.process.kill('SIGINT'); }
 			catch(err) { console.error(err.message); }
 		}
 
