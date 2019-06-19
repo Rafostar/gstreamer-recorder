@@ -140,12 +140,8 @@ class recorder
 			else
 				encodeOpts = [...videoOpts, ...outOpts];
 
-			var stdio;
-			if(opts.output === 'stdout')
-				stdio = ['ignore', 'pipe', 'ignore'];
-			else
-				stdio = 'ignore';
-
+			var stdOpt = (opts.output === 'stdout') ? 'pipe' : 'ignore';
+			var stdio = ['ignore', stdOpt, 'inherit'];
 			encodeOpts.unshift('-qe');
 
 			return { opts: opts, encodeOpts: encodeOpts, stdio: stdio };
