@@ -1,6 +1,6 @@
 {
   "name": "gstreamer-recorder",
-  "version": "0.1.0",
+  "version": "0.1.1",
   "description": "GStreamer wrapper for recording desktop.",
   "main": "index.js",
   "scripts": {
