@@ -93,8 +93,8 @@ class recorder
 			'pulsesrc', `device=${opts.audio.device}`,
 				'provide-clock=true', 'do-timestamp=true', `buffer-time=${opts.audio.buffer}`,
 			'!', 'queue', 'leaky=2', 'max-size-buffers=0', 'max-size-time=0', 'max-size-bytes=0',
-			'!', 'audiorate',
-			'!', 'audio/x-raw,rate=48000,channels=2,depth=16',
+			'!', 'audiorate', 'skip-to-first=true',
+			'!', 'audio/x-raw,channels=2',
 			'!', 'mux.'
 			];
 
