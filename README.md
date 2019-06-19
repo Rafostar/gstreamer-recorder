@@ -1,4 +1,8 @@
 # gstreamer-recorder
+[![npmjs](https://img.shields.io/badge/npmjs-repo-brightgreen.svg)](https://www.npmjs.com/package/gstreamer-recorder)
+[![Donate](https://img.shields.io/badge/Donate-PayPal-blue.svg)](https://www.paypal.com/cgi-bin/webscr?cmd=_s-xclick&hosted_button_id=TFVDFD88KQ322)
+[![Donate](https://img.shields.io/badge/Donate-PayPal.Me-lightgrey.svg)](https://www.paypal.me/Rafostar)
+
 GStreamer wrapper for recording desktop.
 
 Requires [GStreamer-1.0](https://gstreamer.freedesktop.org) with `gst-launch-1.0` binary and following GStreamer1 plugins: base, good, bad, ugly.
@@ -51,3 +55,8 @@ console.log(`Started tcp media server on port ${recorder.opts.server.port}`);
 process.on('SIGINT', () => recorder.stop());
 process.on('SIGTERM', () => recorder.stop());
 ```
+
+## Donation
+If you like my work please support it by buying me a cup of coffee :grin:
+
+[![PayPal](https://www.paypalobjects.com/en_US/i/btn/btn_donateCC_LG.gif)](https://www.paypal.com/cgi-bin/webscr?cmd=_s-xclick&hosted_button_id=TFVDFD88KQ322)
