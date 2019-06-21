@@ -175,7 +175,7 @@ class recorder
 			var merged = deepMerge(mgrTarget, mgrSource);
 
 			var fileDir = String(merged.file.dir);
-			if(fileDir.charAt(0) === '~') fileDir.replace('~', homedir());
+			if(fileDir.charAt(0) === '~') fileDir = fileDir.replace('~', homedir());
 			merged.file.dir = path.normalize(fileDir);
 
 			return merged;
