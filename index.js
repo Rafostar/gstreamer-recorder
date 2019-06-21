@@ -183,8 +183,16 @@ class recorder
 
 		this.getAudioDevices = (asArray) =>
 		{
-			var outStr = execSync(`pacmd list-sources | grep -e "name:"`).toString();
-			var list = outStr.split('name:');
+			var outStr;
+			var list = [];
+
+			try {
+				outStr = execSync(`pacmd list-sources | grep -e "name:"`).toString();
+				list = outStr.split('name:');
+			}
+			catch(err) {
+				console.error('Could not obtain audio devices list');
+			}
 
 			var count = 0;
 			var devicesArray = [];
