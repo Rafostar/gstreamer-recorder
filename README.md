@@ -1,5 +1,6 @@
 # gstreamer-recorder
-[![npmjs](https://img.shields.io/badge/npmjs-repo-brightgreen.svg)](https://www.npmjs.com/package/gstreamer-recorder)
+[![License](https://img.shields.io/npm/l/gstreamer-recorder.svg)](https://github.com/Rafostar/gstreamer-recorder/blob/master/LICENSE)
+[![Downloads](https://img.shields.io/npm/dt/gstreamer-recorder.svg)](https://www.npmjs.com/package/gstreamer-recorder)
 [![Donate](https://img.shields.io/badge/Donate-PayPal-blue.svg)](https://www.paypal.com/cgi-bin/webscr?cmd=_s-xclick&hosted_button_id=TFVDFD88KQ322)
 [![Donate](https://img.shields.io/badge/Donate-PayPal.Me-lightgrey.svg)](https://www.paypal.me/Rafostar)
 
