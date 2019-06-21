@@ -127,8 +127,6 @@ class recorder
 						`host=${opts.server.host}`, `port=${opts.server.port}`, 'sync=false'];
 					break;
 				case('file'):
-					if(opts.file.dir.charAt(0) === '~')
-						opts.file.dir = opts.file.dir.replace('~', homedir());
 					if(!fs.existsSync(opts.file.dir))
 						throw new Error(`Directory does not exists: "${opts.file.dir}"`);
 					outOpts = ['!', 'filesink',
@@ -174,8 +172,13 @@ class recorder
 		{
 			var mgrTarget = (target instanceof Object) ? target : defaults;
 			var mgrSource = (source instanceof Object) ? source : this.opts;
+			var merged = deepMerge(mgrTarget, mgrSource);
 
-			return deepMerge(mgrTarget, mgrSource);
+			var fileDir = String(merged.file.dir);
+			if(fileDir.charAt(0) === '~') fileDir.replace('~', homedir());
+			merged.file.dir = path.normalize(fileDir);
+
+			return merged;
 		}
 
 		this.getAudioDevices = (asArray) =>
