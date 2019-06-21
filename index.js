@@ -1,4 +1,6 @@
 const fs = require('fs');
+const path = require('path');
+const { homedir } = require('os');
 const { spawn, execSync } = require('child_process');
 
 const defaults =
@@ -125,10 +127,12 @@ class recorder
 						`host=${opts.server.host}`, `port=${opts.server.port}`, 'sync=false'];
 					break;
 				case('file'):
+					if(opts.file.dir.charAt(0) === '~')
+						opts.file.dir = opts.file.dir.replace('~', homedir());
 					if(!fs.existsSync(opts.file.dir))
 						throw new Error(`Directory does not exists: "${opts.file.dir}"`);
 					outOpts = ['!', 'filesink',
-						`location=${opts.file.dir}/${opts.file.name}${extension}`, 'sync=false'];
+						'location=' + path.join(opts.file.dir, opts.file.name + extension), 'sync=false'];
 					break;
 				default:
 					throw new Error(`Unsupported output: ${opts.output}`);
