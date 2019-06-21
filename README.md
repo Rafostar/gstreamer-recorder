@@ -24,9 +24,9 @@ var recorder = new gstRecorder({
 var duration = 10000;
 
 recorder.start();
+setTimeout(() => recorder.stop(), duration);
 
 console.log(`Recording ${duration/1000} sec video to ${recorder.opts.file.dir}`);
-setTimeout(() => recorder.stop(), duration);
 ```
 
 Pipe output:
@@ -35,13 +35,13 @@ var fs = require('fs');
 var gstRecorder = require('gstreamer-recorder');
 var recorder = new gstRecorder({ output: 'stdout', format: 'matroska' });
 var destFile = '/tmp/recording.mkv';
-var duration = 10000;
 var writableStream = fs.createWriteStream(destFile);
+var duration = 10000;
 
 recorder.start().pipe(writableStream);
+setTimeout(() => recorder.stop(), duration);
 
 console.log(`Piping output to ${destFile} for ${duration/1000} seconds`);
-setTimeout(() => recorder.stop(), duration);
 ```
 
 Create tcp server:
@@ -50,10 +50,10 @@ var gstRecorder = require('gstreamer-recorder');
 var recorder = new gstRecorder({ output: 'server', server: { port: 8080 }});
 
 recorder.start();
-console.log(`Started tcp media server on port ${recorder.opts.server.port}`);
-
 process.on('SIGINT', () => recorder.stop());
 process.on('SIGTERM', () => recorder.stop());
+
+console.log(`Started tcp media server on port ${recorder.opts.server.port}`);
 ```
 
 ## Donation
