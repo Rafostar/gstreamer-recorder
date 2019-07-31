@@ -2,6 +2,7 @@ const fs = require('fs');
 const path = require('path');
 const { homedir } = require('os');
 const { spawn, execSync } = require('child_process');
+const noop = () => {};
 
 const defaults =
 {
@@ -142,15 +143,18 @@ class recorder
 			else
 				encodeOpts = [...videoOpts, ...outOpts];
 
-			var stdOpt = (opts.output === 'stdout') ? 'pipe' : 'ignore';
-			var stdio = ['ignore', stdOpt, 'inherit'];
-			encodeOpts.unshift('-qe');
+			var stdio = ['ignore', 'pipe', 'pipe'];
+
+			var launchArgs = (opts.output === 'stdout') ? '-qe' : '-e';
+			encodeOpts.unshift(launchArgs);
 
 			return { opts: opts, encodeOpts: encodeOpts, stdio: stdio };
 		}
 
-		this.start = () =>
+		this.start = (cb) =>
 		{
+			cb = cb || noop;
+
 			if(this.process) this.stop();
 			var config = generateConfig();
 
@@ -159,13 +163,54 @@ class recorder
 			this.process.once('error', (err) => console.error(err.message));
 
 			if(config.opts.output === 'stdout')
+			{
 				return this.process.stdout;
+				cb(null);
+			}
+			else
+			{
+				var launched = false;
+
+				var createLaunchTimeout = () =>
+				{
+					return setTimeout(() =>
+					{
+						/* Prevent callback more than once */
+						if(!launched)
+						{
+							launched = true;
+
+							if(this.process) cb(null);
+							else cb(new Error('GStreamer could not start!'));
+						}
+					}, 1200);
+				}
+
+				var launchTimeout = createLaunchTimeout();
+
+				this.process.stdout.on('data', (data) =>
+				{
+					/* Prevent setting timer after launch */
+					if(!launched)
+					{
+						clearTimeout(launchTimeout);
+						launchTimeout = createLaunchTimeout();
+					}
+				});
+			}
 		}
 
-		this.stop = () =>
+		this.stop = (cb) =>
 		{
-			try { this.process.kill('SIGINT'); }
-			catch(err) { console.error(err.message); }
+			cb = cb || noop;
+
+			try {
+				this.process.kill('SIGINT');
+				cb(null);
+			}
+			catch(err) {
+				cb(err);
+			}
 		}
 
 		this.getOptions = (target, source) =>
