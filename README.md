@@ -12,7 +12,7 @@ Used by [GNOME Shell Extension Cast to TV](https://github.com/Rafostar/gnome-she
 
 ## Examples
 Record desktop directly to file:
-```
+```javascript
 var gstRecorder = require('gstreamer-recorder');
 var recorder = new gstRecorder({
   output: 'file',
@@ -31,7 +31,7 @@ console.log(`Recording ${duration/1000} sec video to ${recorder.opts.file.dir}`)
 ```
 
 Pipe output:
-```
+```javascript
 var fs = require('fs');
 var gstRecorder = require('gstreamer-recorder');
 var recorder = new gstRecorder({ output: 'stdout', format: 'matroska' });
@@ -46,7 +46,7 @@ console.log(`Piping output to ${destFile} for ${duration/1000} seconds`);
 ```
 
 Create tcp server:
-```
+```javascript
 var gstRecorder = require('gstreamer-recorder');
 var recorder = new gstRecorder({ output: 'server', server: { port: 8080 }});
 
