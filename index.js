@@ -61,7 +61,7 @@ class recorder
 			'!', 'videoconvert',
 			'!', 'queue',
 			'!', 'x264enc', 'sliced-threads=true', 'tune=zerolatency',
-				`speed-preset=${opts.preset}`, `bitrate=${opts.video.mbps * 1024}`,
+				`speed-preset=${opts.preset}`, `bitrate=${opts.video.mbps * 1000}`,
 				`key-int-max=${opts.video.fps * 2}`,
 			'!', 'h264parse',
 			'!', 'video/x-h264,profile=main'
