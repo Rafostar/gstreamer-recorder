@@ -81,12 +81,18 @@ class recorder
 			switch(opts.format)
 			{
 				case('matroska'):
+				case('mkv'):
 					videoOpts.push('!', 'matroskamux', 'name=mux', `streamable=${isStreamable}`);
 					extension = '.mkv';
 					break;
 				case('mp4'):
 					videoOpts.push('!', 'mp4mux', 'name=mux', `streamable=${isStreamable}`, 'fragment-duration=1');
 					extension = '.mp4';
+					break;
+				case('mpegts'):
+				case('ts'):
+					videoOpts.push('!', 'mpegtsmux', 'name=mux');
+					extension = '.ts';
 					break;
 				default:
 					throw new Error(`Unsupported format: ${opts.format}`);
@@ -133,6 +139,18 @@ class recorder
 					outOpts = ['!', 'filesink',
 						'location=' + path.join(opts.file.dir, opts.file.name + extension), 'sync=false'];
 					break;
+				case('hls'):
+				case('m3u'):
+				case('m3u8'):
+					if(!fs.existsSync(opts.file.dir))
+						throw new Error(`Directory does not exists: "${opts.file.dir}"`);
+					outOpts = [
+						'!', 'hlssink', 'async-handling=true',
+						`location=${opts.file.dir}/segment%05d${extension}`,
+						`playlist-location=${opts.file.dir}/playlist.m3u8`,
+						'target-duration=1', 'playlist-length=3', 'max-files=6'
+					];
+					break;
 				default:
 					throw new Error(`Unsupported output: ${opts.output}`);
 			}
@@ -164,12 +182,22 @@ class recorder
 
 			if(config.opts.output === 'stdout')
 			{
-				return this.process.stdout;
 				cb(null);
+				return this.process.stdout;
 			}
 			else
 			{
 				var launched = false;
+
+				var launchHandler = (data) =>
+				{
+					/* Prevent setting timer after launch */
+					if(!launched)
+					{
+						clearTimeout(launchTimeout);
+						launchTimeout = createLaunchTimeout();
+					}
+				}
 
 				var createLaunchTimeout = () =>
 				{
@@ -180,23 +208,19 @@ class recorder
 						{
 							launched = true;
 
-							if(this.process) cb(null);
-							else cb(new Error('GStreamer could not start!'));
+							if(this.process)
+							{
+								this.process.stdout.removeListener('data', launchHandler);
+								cb(null);
+							}
+							else
+								cb(new Error('GStreamer could not start!'));
 						}
 					}, 1200);
 				}
 
 				var launchTimeout = createLaunchTimeout();
-
-				this.process.stdout.on('data', (data) =>
-				{
-					/* Prevent setting timer after launch */
-					if(!launched)
-					{
-						clearTimeout(launchTimeout);
-						launchTimeout = createLaunchTimeout();
-					}
-				});
+				this.process.stdout.on('data', launchHandler);
 			}
 		}
 
