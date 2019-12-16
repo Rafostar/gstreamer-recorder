@@ -260,39 +260,42 @@ class recorder
 			return merged;
 		}
 
-		this.getAudioDevices = (asArray) =>
-		{
-			var outStr;
-			var list = [];
-
-			try {
-				outStr = execSync('pacmd list-sources | grep -e "name:" -e "index:"').toString();
-				list = outStr.split('>\n');
-			}
-			catch(err) {
-				console.error('Could not obtain audio devices list');
-			}
-
-			var devicesArray = [];
-			var devicesObject = {};
-
-			list.forEach(device =>
-			{
-				var name = device.substring(device.indexOf('<') + 1);
-				if(name)
-				{
-					var index = device.substring(device.indexOf('index:') + 7, device.indexOf('\n'));
-					var isActive = (device.includes('* index:'));
-
-					devicesArray.push(name);
-					devicesObject[index] = { name: name, active: isActive };
-				}
-			});
-
-			if(asArray === true) return devicesArray;
-			else return devicesObject;
-		}
+		this.getAudioSources = (asArray) => { return getSinks('sources', asArray) };
+		this.getAudioSinks = (asArray) => { return getSinks('sinks', asArray) };
 	}
+}
+
+function getSinks(type, asArray)
+{
+	var outStr;
+	var list = [];
+
+	try {
+		outStr = execSync(`pacmd list-${type} | grep -e "name:" -e "index:"`).toString();
+		list = outStr.split('>\n');
+	}
+	catch(err) {
+		console.error('Could not obtain audio devices list');
+	}
+
+	var devicesArray = [];
+	var devicesObject = {};
+
+	list.forEach(device =>
+	{
+		var name = device.substring(device.indexOf('<') + 1);
+		if(name)
+		{
+			var index = device.substring(device.indexOf('index:') + 7, device.indexOf('\n'));
+			var isActive = (device.includes('* index:'));
+
+			devicesArray.push(name);
+			devicesObject[index] = { name: name, active: isActive };
+		}
+	});
+
+	if(asArray === true) return devicesArray;
+	else return devicesObject;
 }
 
 function createFilename()
