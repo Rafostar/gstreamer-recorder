@@ -266,25 +266,26 @@ class recorder
 			var list = [];
 
 			try {
-				outStr = execSync(`pacmd list-sources | grep -e "name:"`).toString();
-				list = outStr.split('name:');
+				outStr = execSync('pacmd list-sources | grep -e "name:" -e "index:"').toString();
+				list = outStr.split('>\n');
 			}
 			catch(err) {
 				console.error('Could not obtain audio devices list');
 			}
 
-			var count = 0;
 			var devicesArray = [];
 			var devicesObject = {};
 
 			list.forEach(device =>
 			{
-				var name = device.substring(device.indexOf('<') + 1, device.indexOf('>'));
+				var name = device.substring(device.indexOf('<') + 1);
 				if(name)
 				{
+					var index = device.substring(device.indexOf('index:') + 7, device.indexOf('\n'));
+					var isActive = (device.includes('* index:'));
+
 					devicesArray.push(name);
-					devicesObject['dev' + count] = name;
-					count++;
+					devicesObject[index] = { name: name, active: isActive };
 				}
 			});
 
