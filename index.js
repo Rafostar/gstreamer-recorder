@@ -24,7 +24,8 @@ const defaults =
 	audio: {
 		device: null, // = no sound
 		buffer: 40000,
-		encoder: null // = copy sound
+		encoder: null, // = copy sound
+		props: [] // array of strings
 	},
 	server: {
 		host: '127.0.0.1',
@@ -33,6 +34,11 @@ const defaults =
 	file: {
 		dir: '/tmp',
 		name: null // = auto generated
+	},
+	hls: {
+		duration: 1, // segment duration
+		playlist: 3, // playlist length
+		files: 10 // segments to keep
 	}
 };
 
@@ -103,8 +109,7 @@ class recorder
 				'provide-clock=true', 'do-timestamp=true', `buffer-time=${opts.audio.buffer}`,
 			'!', 'queue', 'leaky=2', 'max-size-buffers=0', 'max-size-time=0', 'max-size-bytes=0',
 			'!', 'audiorate', 'skip-to-first=true',
-			'!', 'audio/x-raw,channels=2',
-			'!', 'mux.'
+			'!', 'audio/x-raw,channels=2'
 			];
 
 			if(opts.audio.encoder)
@@ -112,13 +117,16 @@ class recorder
 				var audioEncOpts = [
 					'!', 'audioconvert',
 					'!', 'queue',
-					'!', `${opts.audio.encoder}`,
-					'!', 'mux.'
+					'!', `${opts.audio.encoder}`
 				];
 
-				audioOpts.splice(-2, 2);
 				audioOpts = [...audioOpts, ...audioEncOpts];
+
+				if(Array.isArray(opts.audio.props) && opts.audio.props.length > 0)
+					audioOpts = [...audioOpts, ...opts.audio.props];
 			}
+
+			audioOpts.push('!', 'mux.');
 
 			if(opts.file.name === null)
 				opts.file.name = createFilename();
@@ -148,7 +156,9 @@ class recorder
 						'!', 'hlssink', 'async-handling=true',
 						`location=${opts.file.dir}/segment%05d${extension}`,
 						`playlist-location=${opts.file.dir}/playlist.m3u8`,
-						'target-duration=1', 'playlist-length=3', 'max-files=6'
+						`target-duration=${opts.hls.duration}`,
+						`playlist-length=${opts.hls.playlist}`,
+						`max-files=${opts.hls.files}`
 					];
 					break;
 				default:
