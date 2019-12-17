@@ -25,7 +25,7 @@ const defaults =
 		device: null, // = no sound
 		buffer: 40000,
 		encoder: null, // = copy sound
-		props: [] // array of strings
+		props: [] // optional array of strings
 	},
 	server: {
 		host: '127.0.0.1',
@@ -318,7 +318,7 @@ function deepMerge(target, source)
 	{
 		if(target.hasOwnProperty(key))
 		{
-			if(source[key] instanceof Object)
+			if(source[key] instanceof Object && !Array.isArray(source[key]))
 				parsedSource[key] = deepMerge(target[key], source[key]);
 			else
 				parsedSource[key] = source[key];
